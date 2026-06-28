@@ -1,4 +1,8 @@
-# Insurance Assistant (RAG Pipeline)
+# 🛡️ Insurance Assistant (RAG Pipeline)
+
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
+![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 
 Insurance Assistant is a full-stack Retrieval-Augmented Generation (RAG) application that allows users to upload PDF insurance policies and interactively chat with an AI assistant to extract specific information, clauses, and summaries from the document.
 
@@ -18,39 +22,53 @@ The application uses **FastAPI** for a high-performance backend, **PostgreSQL** 
 
 ## 🛠️ Technology Stack
 
-### Backend
-- **Framework**: FastAPI (Python)
-- **Database**: PostgreSQL with SQLAlchemy ORM
-- **Vector Store**: FAISS (Local)
-- **AI / LLM**: Groq API (Llama-3 model)
-- **Embeddings**: HuggingFace `sentence-transformers/all-MiniLM-L6-v2`
-- **Reranker**: HuggingFace `cross-encoder/ms-marco-MiniLM-L-6-v2`
-- **PDF Extraction**: PyMuPDF (`fitz`)
-
 ### Frontend
 - **Framework**: React + Vite
 - **Styling**: Vanilla CSS (Custom tokens, variables, and responsive design)
 - **Icons**: Lucide React
 
-### Python Dependencies (`requirements.txt`)
-Below is the list of Python packages installed in the backend and their definitions:
+### Backend Python Dependencies (`requirements.txt`)
+The backend is highly optimized and stripped of unused bloat. Below are the core Python packages utilized:
 - **`fastapi`**: The core web framework used to build the high-performance APIs.
 - **`uvicorn`**: An ASGI web server implementation used to run the FastAPI application.
 - **`sqlalchemy`**: The SQL toolkit and Object-Relational Mapper (ORM) used to interact with the PostgreSQL database.
-- **`alembic`**: A lightweight database migration tool for use with SQLAlchemy.
 - **`psycopg2-binary`**: The PostgreSQL database adapter for Python.
 - **`python-dotenv`**: Used to load environment variables from the `.env` file.
 - **`pymupdf` (`fitz`)**: A high-performance PDF processing library used to extract text from the uploaded insurance policies.
-- **`langchain`**: A framework for developing applications powered by language models (used here for general RAG utilities).
 - **`langchain-text-splitters`**: Used to intelligently split extracted PDF text into overlapping semantic chunks.
 - **`sentence-transformers`**: A HuggingFace library used to load the local ML embedding model and generate vector embeddings for chunks.
 - **`faiss-cpu`**: Facebook AI Similarity Search, a library for efficient similarity search and clustering of dense vectors.
-- **`transformers`**: HuggingFace library providing state-of-the-art machine learning models (used here as a dependency for the reranker).
-- **`torch`**: PyTorch, the underlying deep learning tensor library required by HuggingFace models.
 - **`python-multipart`**: Required by FastAPI to handle form data and parse file uploads (`UploadFile`).
-- **`pydantic-settings`**: Used by FastAPI/Pydantic for robust environment and settings management.
-- **`accelerate`**: A HuggingFace library that enables PyTorch models to run faster and with a smaller memory footprint.
 - **`groq`**: The official Python client library for the Groq API, used to interface with the Llama 3 model at blazing speeds.
+
+*(Note: Heavy ML dependencies like `torch` and `transformers` are handled implicitly by `sentence-transformers` to avoid version conflicts).*
+
+---
+
+## 📂 Project Architecture
+
+```text
+insurance_rag/
+├── backend/
+│   ├── app/
+│   │   ├── api/            # API Routes: FastAPI controllers for file uploads and chat queries
+│   │   ├── database/       # Database Layer: PostgreSQL connection, schemas, and SQLAlchemy ORM
+│   │   ├── rag/            # AI Engine (RAG): Logic for chunking, HuggingFace embeddings, FAISS, and Llama 3
+│   │   ├── services/       # Business Logic: Service layer orchestrating RAG and database operations
+│   │   ├── utils/          # Utilities: Configuration management
+│   │   └── main.py         # Backend Core: FastAPI entry point and dependencies
+│   ├── .env                # Environment variables
+│   └── requirements.txt    # Python dependencies
+└── frontend/
+    ├── src/
+    │   ├── components/     # UI Components: Reusable React components for FileUpload and ChatBox
+    │   ├── assets/         # Static Assets: Application images and graphics
+    │   ├── App.jsx         # React App: Main application layout and state
+    │   ├── index.css       # Styles: Global CSS tokens and premium Glassmorphism gradients
+    │   └── main.jsx        # React App: DOM rendering entry point
+    ├── package.json        # Frontend Core: Node dependencies
+    └── vite.config.js      # Frontend Core: Vite bundler setup and backend API proxy routing
+```
 
 ---
 
@@ -65,7 +83,7 @@ Below is the list of Python packages installed in the backend and their definiti
 Ensure you have a PostgreSQL database created. By default, the application looks for:
 - Database Name: `insurance_db`
 - User: `postgres`
-- Password: `*******`
+- Password: `*******` *(replace in your local .env)*
 - Port: `5432`
 
 ### 2. Backend Setup
@@ -90,14 +108,17 @@ pip install -r requirements.txt
 
 Ensure your `.env` file is properly configured with your keys:
 ```env
-*********
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/insurance_db 
+GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_API_KEY=your_groq_api_key_here
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+CROSS_ENCODER_MODEL=cross-encoder/ms-marco-MiniLM-L-6-v2
 ```
 
 Start the FastAPI backend server:
 ```bash
 uvicorn app.main:app --reload
 ```
-*(Note: The first startup may take a few seconds as it downloads and caches the HuggingFace models into memory).*
 
 ### 3. Frontend Setup
 Open a new terminal window and navigate to the frontend directory:
@@ -119,28 +140,3 @@ npm run dev
 - Open your browser and navigate to `http://localhost:5173`.
 - Upload a valid PDF document.
 - Once processed, type your question in the chatbox to query the AI about the document's contents!
-
----
-
-## 📂 Project Structure
-
-```text
-insurance_rag/
-├── backend/
-│   ├── app/
-│   │   ├── api/            # FastAPI route controllers (upload, chat)
-│   │   ├── database/       # SQLAlchemy models, schemas, and CRUD operations
-│   │   ├── rag/            # AI logic: chunking, embedding, FAISS, reranking, LLM
-│   │   ├── services/       # Core business logic connecting API to DB and RAG
-│   │   └── main.py         # FastAPI application entry point
-│   ├── .env                # Environment variables
-│   └── requirements.txt    # Python dependencies
-└── frontend/
-    ├── src/
-    │   ├── components/     # React components (FileUpload, ChatBox)
-    │   ├── App.jsx         # Main application layout
-    │   ├── index.css       # Global design tokens and gradients
-    │   └── main.jsx        # React DOM entry point
-    ├── package.json        # Node dependencies and scripts
-    └── vite.config.js      # Vite configuration and backend proxy setup
-```
