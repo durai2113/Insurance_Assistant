@@ -1,45 +1,25 @@
-# =====================
 # Node & Frontend
-# =====================
 node_modules/
 dist/
 dist-ssr/
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# =====================
 # Python & Backend
-# =====================
 __pycache__/
 *.py[cod]
-*$py.class
 .venv/
-venv/
-env/
-ENV/
 
-# Local databases and indices
+# Local databases, file uploads, and FAISS indices
 *.db
 *.sqlite3
 backend/faiss_index/
 backend/uploads/
-backend/app/faiss_index/
-backend/app/uploads/
-alembic.ini
+
 # Environment Variables
 .env
 .env.local
-.env.*.local
 
-# =====================
 # OS & Editors
-# =====================
 .DS_Store
 .idea/
 .vscode/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
