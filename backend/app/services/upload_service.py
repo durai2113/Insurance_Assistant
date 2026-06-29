@@ -10,6 +10,9 @@ from app.rag.chunker import split_text
 from app.rag.embedding import create_embeddings
 from app.rag.vector_store import save_index
 
+from sqlalchemy.orm import Session
+from app.database import crud
+
 BASE_DIR = Path(__file__).resolve().parents[1]
 UPLOAD_FOLDER = BASE_DIR / "uploads"
 
@@ -28,7 +31,7 @@ def save_pdf(file: UploadFile) -> str:
     return str(file_path)
 
 
-def process_pdf(file_path: str):
+def process_pdf(file_path: str, db: Session, filename: str):
     """Extract text, create embeddings, and store the FAISS index."""
 
     text = extract_text(file_path)
@@ -46,3 +49,11 @@ def process_pdf(file_path: str):
     embeddings = create_embeddings(chunks)
 
     save_index(chunks, embeddings)
+
+    # Save to PostgreSQL
+    crud.create_document(
+        db=db,
+        filename=filename,
+        file_path=file_path,
+        faiss_path="faiss_index/index.faiss"
+    )

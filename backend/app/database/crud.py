@@ -3,6 +3,18 @@ from sqlalchemy.orm import Session
 from . import models, schemas
 
 
+def create_document(db: Session, filename: str, file_path: str, faiss_path: str):
+    db_doc = models.Document(
+        filename=filename,
+        file_path=file_path,
+        faiss_path=faiss_path
+    )
+    db.add(db_doc)
+    db.commit()
+    db.refresh(db_doc)
+    return db_doc
+
+
 def create_chat(db: Session, chat: schemas.ChatCreate):
     db_chat = models.ChatHistory(
         session_id=chat.session_id,
