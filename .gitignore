@@ -23,4 +23,3 @@ backend/uploads/
 .DS_Store
 .idea/
 .vscode/
-alembic.ini
